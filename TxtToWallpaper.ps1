@@ -63,15 +63,15 @@ function New-PlaceholderImage {
 
 
 $runMinute = (Get-Date).minute
-
+$runn = $false
 if ((($runMinute -lt 36) -and ($runMinute -gt 34)) -or (($runMinute -lt 6) -and ($runMinute -gt 4))) {
     if (Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet) {
         $runn = $true
-        Write-Output 'Canli mod: Veriler APIden çekiliyor...'
+        Write-Output 'Live mode: Veriler APIden çekiliyor...'
     }
     else {
         $runn = $false
-        Write-Output 'Test mod: .......................No internet......................'
+        Write-Output 'Test modeee: No internet'
     }
 }
 
@@ -96,12 +96,12 @@ if ($runn) {
     }
     else {
         $data = Get-Content '.\Test\w.json' -Raw | ConvertFrom-Json
-        Write-Host 'NO internnet data for weather....'
+        Write-Host 'NO internet data for weather....'
     }
 }
 else {
     $data = Get-Content '.\Test\w.json' -Raw | ConvertFrom-Json
-    # Write-Host 'Test modu: Hava durumu              data'
+    # Write-Host 'Test modeeee: Weather data'
 }
 
 
@@ -112,7 +112,7 @@ $hava12 = $data.'v3-wx-forecast-hourly-12hour'.wxPhraseLong
 $vTimeL = $data.'v3-wx-forecast-hourly-12hour'.validTimeLocal | ForEach-Object { [datetime]$_ }
 $iconcode12 = $data.'v3-wx-forecast-hourly-12hour'.iconcode
 $prChnce12 = $data.'v3-wx-forecast-hourly-12hour'.precipChance
-# 15 günlük...................................................................
+# 15 daily...................................................................
 $iconcode30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].iconcode
 $hava30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].wxPhraseLong
 $temp30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].temperature
@@ -206,7 +206,7 @@ else {
 
 # todo:add temperature picture and show current temp as visual
 
-$gfx.FillRectangle($steal, 0, 0, 1920, 1080)
+# $gfx.FillRectangle($steal, 0, 0, 1920, 1080)
 # $gfx.FillRectangle($steal, 1615, 0, 365, 1080)
 
 #----------------------------------------------------------------#
@@ -219,11 +219,11 @@ $gfx.FillRectangle($steal, 0, 0, 1920, 1080)
 # ---------sun horizon side vertical arc lines--------------------------------
 
 
-$sry = New-Object System.Drawing.Pen $gryd, 5
-$sry2 = New-Object System.Drawing.Pen $grydrkb, 3
+$sry = New-Object System.Drawing.Pen $grydrk, 3
+$sry2 = New-Object System.Drawing.Pen $grydrkb, 1
 
 # keep suncx calculation
-$suncx = $mainRy * 1.15
+$suncx = $mainRy * 1.25
 
 $sunRect = New-Object System.Drawing.Rectangle ([int]($c1 - $suncx * 1)), ([int]($c2 - $suncx * 2.2)), ([int]($suncx * 2)), ([int]($suncx * 4.4))
 # $gfx.drawEllipse($sry, $sunRect)
@@ -243,17 +243,17 @@ $gfx.DrawArc($sry2, $sunRect, 320 + $passPa * 80, 80 - $passPa * 80 )
 $sunAngle = if ($passPm -lt 1) { 180 + 45 * $rateday * (1 - 2 * $passPm) }else { 315 + $passPa * 90 }
 $sunRdn = (360 - $sunAngle) * [System.Math]::PI / 180
 
-$sunx = $c1 + $suncx * [System.Math]::Cos($sunRdn) * 0.96
+$sunx = $c1 + $suncx * [System.Math]::Cos($sunRdn)
 $snVx = if ($passPm -lt 1) { 50 }else { 50 }
 $suny = if ($passPm -lt 1) { $c2 + $mainRy * $rateday * (1 - 2 * $passPm) }else { $c2 - $mainRy * (1 - 2 * $passPa) }
 
-$srect = New-Object System.Drawing.Rectangle ([int]($sunx - 48)), ([int]($suny - 48)), 64, 64
+$srect = New-Object System.Drawing.Rectangle ([int]($sunx - 39)), ([int]($suny - 32)), 64, 64
 $imgPath = Join-Path $PSScriptRoot ".\Deluxe\$iconcode.png"
 if (Test-Path $imgPath) {
     $img = [System.Drawing.Bitmap]::FromFile($imgPath)
 }
 else {
-    New-PlaceholderImage -Path $imgPath -Width 128 -Height 128 -Text $iconcode
+    New-PlaceholderImage -Path $imgPath -Width 64 -Height 64 -Text $iconcode
     $img = [Bitmap]::FromFile($imgPath)
     Write-Verbose "Created placeholder image: $imgPath"
 }
@@ -273,9 +273,9 @@ if ($img) {
 }
 
 
-$bgday = $png.GetPixel([int]($sunx - $snVx), [int]($suny + 60))
-$bgdyclr = Contrst $bgday
-$gfx.DrawString(([datetime]$lastme).ToString('HH:mm'), $font, $grydrk, $srect.X + 12, $srect.Y + 70)
+# $bgday = $png.GetPixel([int]($sunx - $snVx), [int]($suny + 60))
+# $bgdyclr = Contrst $bgday
+$gfx.DrawString(([datetime]$lastme).ToString('HH:mm'), $font, $whte, $srect.X + 12, $srect.Y + 70)
 
 
 
@@ -334,13 +334,13 @@ finally {
 
 #----------------------------------------------------------------------------# clock
 #                                                                            #
-#                                     Grid çizgileri                         #
+#                                     Grid lines                         #
 #                                                                            #
 #----------------------------------------------------------------------------#
 
 # #     ---------grid-------------
 # $fgt = 60
-# # Grid çizgileri test
+# # Grid grid lines test
 # $tgf = $fgt * 33
 # for ($i = 0; $i -lt $tgf; $i += $fgt * 0.25) {
 #     if ($i % $fgt -eq 0) {
@@ -389,7 +389,7 @@ $gfx.Restore($state)
 # ------------------------drawing clock and hourly weather------------------------
 
 
-# sıcaklığa göre renk
+# color based on temperature
 $bgclr = ColorTemp $tempnow 192
 $fontclr = Contrst $bgclr.Color
 
@@ -404,10 +404,10 @@ $rd = 0
 $br = 0
 
 
-# --------------saat iç dolgu ve çember çizgisi----------
+# --------------clock inner fill and circle outline----------
 
 
-$hvv = -20
+$hvv = 0
 # saatin iç dolgusu
 # $gradientRect = New-Object System.Drawing.Rectangle ([int]($c1 - $mainRx - $hvv)), ([int]($c2 - $mainRy - $hvv)), ([int]($mainRx * 2 + $hvv * 2)), ([int]($mainRy * 2 + $hvv * 2))
 # $gradientBrush = [LinearGradientBrush]::new($gradientRect, $colorStart, $colorEnd, 270)
@@ -415,7 +415,7 @@ $hvv = -20
 
 
 $mainRxScaled = $mainRx * 1
-# saatin dış çizgisi
+# saatin dış outline
 # $gradientRect = [Rectangle]::new($c1 - $mainRxScaled * 1.1, $c2 - $mainRy * 1.05, $mainRxScaled * 2.2, $mainRy * 2.1)
 # $srhy = [Pen]::new($flrc, 1)
 # $gfx.drawEllipse($srhy, $gradientRect)
@@ -424,15 +424,17 @@ $mainRxScaled = $mainRx * 1
 # $srhy = [Pen]::new($flrc, 1)
 # $gfx.drawEllipse($srhy, $gradientRect)
 
-# $gfx.drawEllipse($glowBrush, $c1 - $mainRx, $c2 - $mainRy, $mainRx * 2, $mainRy * 2)
 
+$kts = 2.45
+# $gfx.FillEllipse($tquaz2, $c1 - $mainRx * $kts, $c2 - $mainRy * $kts, $mainRx *2* $kts, $mainRy * 2 * $kts)
+# $gfx.FillEllipse($ornge2, $c1 - $mainRx, $c2 - $mainRy, $mainRx * 2, $mainRy * 2)
 
 
 
 
 #----------------------------------------------------------------------------#
 #                                                                            #
-#              Drawing clock   and   horly temperature                       #
+#              Drawing clock   and   hourly temperature                       #
 #                                                                            #
 # ---------------------------------------------------------------------------#
 
@@ -440,7 +442,7 @@ $mainRxScaled = $mainRx * 1
 # $clrd = Contrst $bghour
 $hr = $now.Hour
 $mn = $now.Minute
-$hvv = 26
+$hvv = 0
 $nowi = $hr * 4
 $nowd = $nowi + [int]($mn / 15)
 $nowdf = ($nowi + ($mn / 15))
@@ -470,7 +472,7 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
 
     if ( $startIdx -lt 4 ) {
         #[0,47]$startIdx = 0 = now hour ==> $startIdx = 4 = next hour ... $startIdx = 44 = last hour
-        $gfx.DrawLine( (New-Object System.Drawing.Pen $grydrkb, 13), $ofx * 0.985, $ofy , $ofx2 * 0.985, $ofy2 )
+        $gfx.DrawLine( (New-Object System.Drawing.Pen $glowBrush2, 34), $ofx, $ofy , $ofx2, $ofy2 )
     }
     # else {
     #     $gfx.DrawLine( (New-Object System.Drawing.Pen $grydrk, 1), $ofx, $ofy , $ofx2, $ofy2)
@@ -481,13 +483,14 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
     $gfx.RotateTransform($NewTdg)
 
     if (($startIdx % 4) -eq 0) {
+        $newRlen *= 0.9
         $idx = [math]::min($startIdx / 4, 11) # [0,11]
         # Write-Host "ooHour:$i  $newi  $idx  $startIdx $([math]::round($NewTdg)) "
-        $gfx.DrawString("$([int]($i/4)%24)", $font, $grydrk, (New-Object System.Drawing.PointF ($mainRx * 0.9), (-10)))
+        $gfx.DrawString("$([int]($i/4)%24)", $font, $gryd, (New-Object System.Drawing.PointF ($mainRx * 0.78), (-10)))
         # current hour temperature on clock arc + weather phrase in center circle
         if ( $idx -eq 0) {
-            $gfx.DrawString($tempnow, $fontMid, $bgclr, (New-Object System.Drawing.PointF ($newRlen + $hvv - 29), ( - 10)))
-            $gfx.DrawString($havanow, $fontgf, $bgclr, (New-Object System.Drawing.PointF (33), (-5)))
+            $gfx.DrawString($tempnow, $fontMid, $bgclr, (New-Object System.Drawing.PointF ($newRlen), ( - 10)))
+            $gfx.DrawString($havanow, $fontgf, $bgclr, (New-Object System.Drawing.PointF (30), (-5)))
         }
         else {
             $idx = [math]::min($startIdx / 4 - 1, 11)
@@ -497,7 +500,7 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
                 $tempclr = ColorTemp $temp12[$idx] 180
                 # $glwclr = Contrst $tempclr.Color 180
                 # $gfx.FillEllipse($glwclr, $newRlen + $hvv - 30, -10, 24, 20)
-                $gfx.DrawString($temp12[$idx], $fontSmaller, $tempclr, (New-Object System.Drawing.PointF ($newRlen + $hvv - 25), (-10)))
+                $gfx.DrawString($temp12[$idx], $fontSmaller, $tempclr, (New-Object System.Drawing.PointF ($newRlen ), (-10)))
             }
             $hava12[$idx] = if ($hava12[$idx].length -gt 17) { $hava12[$idx].Substring(0, 17) } else { $hava12[$idx] }
             $hava12clr = if ($prChnce12[$idx] -ge 50) { $tquaz }else { $gryl }
@@ -509,7 +512,7 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
     }
     if ( $i -eq $nowd) {
         # saat çubuğu _ akrep=yelkovan
-        $gfx.DrawLine( (New-Object System.Drawing.Pen $grydrkb, 5), 0, 0, $newRlen + $hvv, -2)
+        $gfx.DrawLine( (New-Object System.Drawing.Pen $grydrkb, 5), 0, 0, $newRlen, -2)
         $nowdgre = $NewTdg
     }
     $gfx.Restore($state)
@@ -517,10 +520,9 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
 
 
 # day in the top clock  ==      28 pazar
-$gfx.DrawString($dyinfo, $fontmc, $gryl, $c1 - 35, $c2 * 0.4)
-
+$gfx.DrawString($dyinfo, $fontmc, $gryl, $c1 - 35, $Height * 0.27)
 #---sunrise-set time in the bottom clock--- 11.11.1111 22:07:54
-$bootrec = New-Object System.Drawing.RectangleF ($c1 - 45), ($c2 * 1.55), 100, 50
+$bootrec = New-Object System.Drawing.RectangleF ($c1 - 45), ($Height * 0.7), 100, 50
 $format.FormatFlags = [StringFormatFlags]::NoWrap
 $gfx.DrawString("$($sunrise.ToString('HH:mm'))   $($sunset.ToString('HH:mm')) `n $([int]($rmnM/60))s $([int]($rmnM%60))d", $font, $rmnclr, $bootrec, $format)
 # ~~~~~~~~
@@ -530,7 +532,7 @@ $gfx.DrawString("$($sunrise.ToString('HH:mm'))   $($sunset.ToString('HH:mm')) `n
 
 
 # -----------daytime or todayMidnight pie--------------circle in the middle -------------------------------
-$rpie = $mainrx
+$rpie = $mainrx * 0.9
 $rectpie = [System.Drawing.Rectangle]::new(
     [int]([math]::Round($c1 - $rpie)),
     [int]([math]::Round($c2 - $rpie)),
@@ -552,14 +554,9 @@ $gfx.FillPie($pieclr, $rectpie, $nowdgre, 360 * (1 - $dayProgress))
 
 
 
-
-
-
-
-
 #----------------------------------------------------------------#
 #                                                                #
-#            haftalık ikonlar, derece ve günler                  #
+#           Weekly weather ,icons                #
 #                                                                #
 # ---------------------------------------------------------------#
 
@@ -568,7 +565,7 @@ $gfx.FillPie($pieclr, $rectpie, $nowdgre, 360 * (1 - $dayProgress))
 $flrc = [Color]::FromArgb(250, 0, 0, 0)
 $flrb = New-Object System.Drawing.SolidBrush $flrc
 $hv = 2
-$hy = $height * 0.9
+$hy = $height * 0.85
 $topy = $hy
 $firsty = $hy
 for ($hx = 20; $hx -lt 520; $hx += 100) {
@@ -595,7 +592,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
         if ($hx -gt 20) {
             $gfx.DrawLine([Pen]::new($grydrk, 1), $hx - 100 + 42, $firsty + 55, $hx + 42, $hy + 55)
         }
-        # Write-Host "Day $($hv): $($temp30[$hv])°C,  $firsty y-position: $hy, topy: $topy $($temp30[$hv] - $temp30[$hv - 2])"
+        # Write-Host "Day $($hv): $($temp30[$hv])Â°C,  $firsty y-position: $hy, topy: $topy $($temp30[$hv] - $temp30[$hv - 2])"
         $firsty = $hy
         # Write-Host "Adjusting y-position for day $hv based on temperature difference: $topy  $($temp30[$hv]) $(-$temp30[$hv] + $temp30[$hv-2])  ($hx $hy)"
         $rect = New-Object System.Drawing.Rectangle ([int]$hx), ([int]($hy - 20)), 32, 32
@@ -636,7 +633,7 @@ $random = New-Object System.Random
 $mtvs = $true
 if ($mtvs) {
     $strng = Get-Content '.\motive.txt' -Raw
-    $motve = $strng -split '."' | ForEach-Object { $_.Trim() }
+    $motve = $strng -split '\."' | ForEach-Object { $_.Trim() }
 
     # $chs1 = $random.Next(0, $motve.Count)
     # $gfx.DrawString(($motve)[52], $font, $gryl, [PointF]::new($unt*2 , 3))
@@ -690,7 +687,7 @@ if ($runn) {
     }
 }
 else {
-    # Write-Host 'Test modu: Spor haberleri            data'
+    # Write-Host 'Test modeeeee: Sport news            data'
     $xml.LoadXml((Get-Content '.\Test\spor.xml' -Raw))
 }
 $items = $xml.SelectNodes('//item')
@@ -707,9 +704,9 @@ $items | Select-Object -First $ttle | ForEach-Object {
     $i += 1
 }
 # drawing sport new
-$dbg = 'Spor haberleri:                '
+$dbg = 'Sport news:                '
 # circlec -r ($mainRy * 1.85) -dg 198 -text $snews -hozntl $false -fontcrcl $fontgf -grdr $true -clrd $false -mode 'snews'
-$yPos = $height * 0.82
+$yPos = $height * 0.8
 # $Mtv = $png.GetPixel(1590, 890)
 # # $mtv
 # $clrMtv = Contrst $Mtv
@@ -720,10 +717,10 @@ for ($n = 0; $n -lt $snews.GetLength(0); $n++) {
             # $stext = $gfx.MeasureString($snews[$n,0], $font)
             # $rectsport = [RectangleF]::new(90, $yPos + $n * 30, $stext.Width2*0.85, $stext.Height)
             # $gfx.FillRectangle($glowBrushR, $rectsport)
-            $gfx.DrawString(($snews[$n, 0]), $font, $ornge2, [PointF]::new(1550 - $n * 5, $yPos + ($n * 22)))
+            $gfx.DrawString(($snews[$n, 0]), $font, $ornge2, [PointF]::new($width * 0.78 - $n * 5, $yPos + ($n * 22)))
         }
         else {
-            $gfx.DrawString(($snews[$n, 0]), $font, $tquaz2, [PointF]::new(1550 - $n * 5, $yPos + ($n * 22)))
+            $gfx.DrawString(($snews[$n, 0]), $font, $tquaz2, [PointF]::new($width * 0.78 - $n * 5, $yPos + ($n * 22)))
         }
     }
 }
@@ -751,7 +748,7 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
         try {
             $response = Invoke-RestMethod -Uri $url -Method Get -ErrorAction Stop
             if ($response.table) {
-                # Write-Output "Lig : $($t+1) - Veriler API'den çekiliyor..."
+                # Write-Output "Lig : $($t+1) - Data is being fetched from the API..."
                 [System.IO.File]::WriteAllText(
                     ".\Test\etable$t.json",
                     ($response | ConvertTo-Json -Depth 10),
@@ -764,7 +761,7 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
             }
         }
         catch {
-            # Write-Output "Lig : $($t+1) - Hata: $($_.Exception.Message). Veriler yedekten çekiliyor..."
+            # Write-Output "Lig : $($t+1) - Hata: $($_.Exception.Message). Veriler from backup çekiliyor..."
             $tble = (Get-Content ".\Test\etable$t.json" -Raw | ConvertFrom-Json).table
         }
     }
@@ -773,17 +770,17 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
     }
 
     if ($null -ne $tble) {
-        # ✅ Her lig için doğru boyutta yeniden oluştur
+        # ✓ Her lig için doğru boyutta Newden occurredr
         $ligr = New-Object 'string[,]' $tble.Count, 3
 
         for ($i = 0; $i -lt $tble.Count; $i++) {
             $team = $tble[$i]
             $tims += $team.strTeam
 
-            # ✅ Güvenli karakter kesme
+            # ✓ Güvenli karakter kesme
             $ligr[$i, 0] = if ($team.strTeam.Length -gt 13) { $team.strTeam.Substring(0, 13) } else { $team.strTeam }
 
-            # ✅ Case-insensitive form dönüşümü
+            # ✓ Case-insensitive form dönüşümü
             # if ($team.strForm -eq '') { $team.strForm = '-' }
             if ($tble[0].intPlayed -eq 0) { $tble[0].intPlayed = 1 }
 
@@ -808,12 +805,13 @@ $tims += @('Liverpool', 'Tottenham Hotspur')
 #----------------------------------------------------------------#
 #                                                                #
 #               NEXT matches champs league                       #
-
+#
 
 
 $bgnext = $png.GetPixel($unt * 51, 30)
 $nxtclr = Contrst $bgnext
-function DrawNextMatch {
+# 4960 türkish cup
+function NextLeagueMatch {
     param([int]$LeagueId, [int]$YOffset, [string]$MatchName)
     $testFile = ".\Test\eday$($LeagueId).json"
 
@@ -821,9 +819,8 @@ function DrawNextMatch {
         $url = "https://www.thesportsdb.com/api/v1/json/123/eventsnextleague.php?id=$LeagueId"
         try {
             $response = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -ErrorAction Stop
-            # Write-Output "$MatchName : Veriler API'den çekiliyor..."
 
-            # ✅ BOM'u temizle, sonra kaydet
+            # ✓ Remove BOM then save
             $cleanJson = $response.Content -replace '^\xEF\xBB\xBF', '' -replace '^\uFEFF', ''
             $cleanJson | Out-File -FilePath $testFile -Encoding UTF8
 
@@ -831,12 +828,12 @@ function DrawNextMatch {
             $nxtmatch = $data.events | Select-Object -First 1
         }
         catch {
-            Write-Output "Veriler $MatchName için çekilirken hata oluştu: $($_.Exception.Message)"
-            Write-Output 'Test moduna geçiliyor...'
+            Write-Output "Veriler $MatchName için çekilirken hata olu?tu: $($_.Exception.Message)"
+            Write-Output 'Switching to Test modeeeee...'
         }
     }
     else {
-        # ✅ Dosyadan da BOM temizle
+        # ✓ Also remove BOM from file
         $cleanJson = (Get-Content $testFile -Raw) -replace '^\uFEFF', ''
         $data = $cleanJson | ConvertFrom-Json
         $nxtmatch = $data.events | Select-Object -First 1
@@ -846,43 +843,56 @@ function DrawNextMatch {
         $datime = Get-Date -Date $nxtmatch.strTimestamp
         $eventStr = $datime.AddHours(3).ToString('dd MMM  HH:mm') + '    ' + $nxtmatch.strEvent
         # $gfx.FillRectangle($glowBrushR, $unt * 51, $YOffset, 322, 20)
-        $gfx.DrawString($eventStr, $fontSmaller, $nxtclr, (New-Object System.Drawing.PointF ($unt * 51 + $YOffset - 15), $YOffset))
-    }
-}
-# New-LayoutCard -X ($unt * 51 - 15) -Y 0 -Width 420 -Height 130 -Title 'YAKINDA' -TitleColor 'tquaz' -Opacity 45
-# DrawNextMatch -LeagueId 4480 -YOffset 10 -MatchName 'Champions League Match'
-# DrawNextMatch -LeagueId 4429 -YOffset 30 -MatchName 'Turkish Cup Match'
-DrawNextMatch -LeagueId 135985 -YOffset 10 -MatchName 'Champions League Match'
-DrawNextMatch -LeagueId 4429 -YOffset 30 -MatchName 'Turkish Cup Match'
-if ($runn) {
-    # $gsrl = 'https://www.thesportsdb.com/api/v1/json/123/eventsnext.php?id=133804'
-    $gsrl = 'https://www.thesportsdb.com/api/v1/json/123/eventsnext.php?id=135985'
-
-    $gs = Invoke-RestMethod -Uri $gsrl -Method Get -UseBasicParsing
-    $gsEv = $gs.events.strEvent
-    if ($gs.events.strTimestamp) {
-        $gsTm = ([datetime]$gs.events.strTimestamp).addhours(3).ToString('dd MMM HH:mm')
-        "$gsTm    $gsEv" | Out-File -FilePath '.\test\gs.txt'
-        # $gfx.FillRectangle($glowBrushR, $unt * 51, 100, 322, 20)
-        $gfx.DrawString("$gstm     $gsev", $fontgf, $nxtclr, (New-Object System.Drawing.PointF ($unt * 51 + 10), 50))
-    }
-}
-else {
-    $gsnxt = Get-Content '.\test\gs.txt' -Raw
-    # $gfx.FillRectangle($glowBrushR, $unt * 51, 100, 322, 20)
-    if ($gsnxt.Length -gt 5) {
-        $gfx.DrawString($gsnxt, $fontSmaller, (New-Object System.Drawing.SolidBrush $bgnext), (New-Object System.Drawing.PointF ($unt * 51 + 26), 51))
-        $gfx.DrawString($gsnxt, $fontSmaller, $nxtclr, (New-Object System.Drawing.PointF ($unt * 51 + 25), 50))
-
+        $gfx.DrawString($eventStr, $fontSmaller, $nxtclr, (New-Object System.Drawing.PointF ($unt * 51), $YOffset))
     }
 }
 
+# New-league match
+# NextLeagueMatch -LeagueId 4480 -YOffset 10 -MatchName 'Champions League Match'
+NextLeagueMatch -LeagueId 4429 -YOffset 30 -MatchName 'FIFA World Cup'
+NextLeagueMatch -LeagueId 135985 -YOffset 50 -MatchName 'UEFA Nations League '
+# NextLeagueMatch 4960 -YOffset 70 -MatchName 'Turkish Cup Match'
 
+function NextTeamMatch {
+    param([int]$LeagueId, [int]$YOffset, [string]$MatchName)
+    $testFile = ".\Test\nexteam$($LeagueId).json"
 
+    if ($runn) {
+        $url = "https://www.thesportsdb.com/api/v1/json/123/eventsnext.php?id=$LeagueId"
+        try {
+            $response = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -ErrorAction Stop
+            # Write-Output "$MatchName : Data is being fetched from the API..."
 
+            # ✓ Remove BOM then save
+            $cleanJson = $response.Content -replace '^\xEF\xBB\xBF', '' -replace '^\uFEFF', ''
+            $cleanJson | Out-File -FilePath $testFile -Encoding UTF8
 
+            $data = $cleanJson | ConvertFrom-Json
+            $nxtmatch = $data.events | Select-Object -First 1
+        }
+        catch {
+            Write-Output "Veriler $MatchName için çekilirken hata occurred: $($_.Exception.Message)"
+            Write-Output 'Test modeeeeena geçiliyor...'
+        }
+    }
+    else {
+        # ✓ Also remove BOM from file
+        $cleanJson = (Get-Content $testFile -Raw) -replace '^\uFEFF', ''
+        $data = $cleanJson | ConvertFrom-Json
+        $nxtmatch = $data.events | Select-Object -First 1
+    }
 
+    if ($null -ne $nxtmatch) {
+        $datime = Get-Date -Date $nxtmatch.strTimestamp
+        $eventStr = $datime.AddHours(3).ToString('dd MMM  HH:mm') + '    ' + $nxtmatch.strEvent
+        # $gfx.FillRectangle($glowBrushR, $unt * 51, $YOffset, 322, 20)
+        $gfx.DrawString($eventStr, $fontSmaller, $nxtclr, (New-Object System.Drawing.PointF ($unt * 51 ), $YOffset))
+    }
+}
 
+# New-team match
+NextTeamMatch -LeagueId 133804 -YOffset 90 -MatchName 'Gs'
+NextTeamMatch -LeagueId 135985 -YOffset 110 -MatchName 'Milli tak?m'
 
 
 
@@ -911,7 +921,7 @@ for ($t = 0; $t -lt $ligs.Count; $t++) {
         }
     }
     else {
-        # Write-Host 'Test modu: Günün önemli maçları'
+        # Write-Host 'Test modeeeee: Dayün önemli matchesı'
         $response2 = Get-Content ".\Test\eday$t.json" -Raw | ConvertFrom-Json
         if ($response2.events) {
             $mtchs += $response2.events
@@ -923,20 +933,22 @@ if (($mtchs.Count) -gt 1) {
     $mtchs = $mtchs | Sort-Object -Property { [datetime]$_.strTimestamp }
 }
 
-Write-Output "$($mtchs.count) maç var...`n"
+Write-Output "$($mtchs.count) match var...`n"
 # $lngth2 = $mtchs | Sort-Object -Property { [string]$_.strEvent.Length } -Descending | Select-Object -First 1
 # $evnt = New-Object 'string[,]' ($mtchs.Count), 4
 $vy2 = $c2 + $mainRy
 $vy = 0
 $bttm = $c2 + $mainrY
 
+# for ($i = 1; $i -lt 2; $i++) {
 for ($i = 0; $i -lt $mtchs.Count; $i++) {
     $mtch = $mtchs[$i]
     $timhome = if ($mtch.strHomeTeam.length -gt 13) { $mtch.strHomeTeam.Substring(0, 13) }else { $mtch.strHomeTeam }
     $timaway = if ($mtch.strAwayTeam.length -gt 13) { $mtch.strAwayTeam.Substring(0, 13) }else { $mtch.strAwayTeam }
     $intHomeScore = $mtch.intHomeScore
     $intAwayScore = $mtch.intAwayScore
-
+    # for ($j = 0; $j -lt 12; $j++) {
+    # $dt = $(Get-Date $mtch.strTimestamp).AddHours(3 + $j)
     $dt = $(Get-Date $mtch.strTimestamp).AddHours(3)
     $tme = $dt.ToString('HH:mm')
     # Compute dgt in 0..47 (always positive)
@@ -950,7 +962,8 @@ for ($i = 0; $i -lt $mtchs.Count; $i++) {
     $angt = $elpt.newT * 180 / [math]::PI
     # Write-Host  "$angt $dgt                             mx=$([math]::round($mx)) $([math]::round($my))"
 
-    if ($dgt -ge 12 -and $dgt -le 14) { $mx -= 30 }
+    if ($dgt -ge 12 -and $dgt -le 14) { $mx -= 80 }
+    if ($dgt -ge 34 -and $dgt -le 36) { $mx -= 80 }
 
     # colors
     $mrmn = $now - $dt
@@ -981,7 +994,7 @@ for ($i = 0; $i -lt $mtchs.Count; $i++) {
             $mhr = [System.Math]::Floor(-$mrmn.TotalHours)
             $mmn = - $mrmn.TotalMinutes % 60
             $mtcmnt = "$([int]$mhr)'$([int]$mmn)"
-            Write-Host $mmn
+            # Write-Host $mmn
         }
         else {
             $mtcmnt = "$([System.Math]::min(90, $mrmn.TotalMinutes))'"
@@ -993,41 +1006,50 @@ for ($i = 0; $i -lt $mtchs.Count; $i++) {
     # $awayT = $gfx.MeasureString($infomtch, $fontgf)
     $awayT = $gfx.MeasureString($timaway, $fontgf).Width
     $homeT = $gfx.MeasureString($timhome, $fontgf).Width
-    $teamL = if (($mtch.strAwayTeam -in $tims) -or ($mtch.strHomeTeam -in $tims)) { 30 } else { 3 }
-    # $vh = $awayT.Height * 1.35
+    $spaceT = if (($mtch.strAwayTeam -in $tims) -or ($mtch.strHomeTeam -in $tims)) { 10 } else { 5 }
+
     # $vh = $awayT.Height * 1.35
     $vh = 25
-    if ($mx -le $c1) {
+    $rectLen = ($awayT + $homeT + $spaceT + 135) # 5+(35)+5+(home)+(spaceT)+40+(away)+5   +45
+    if (($($dt.Hour % 12) -ge 6) -or ($($dt.Hour % 12) -eq 0)) {
+        $vy = 0
+        # Write-Host $($dt.Hour % 12)
         if ($my -gt ($vy2 - $vh)) {
             $vy2 -= $vh
         }
         else {
             $vy2 = $my
         }
-        $mx -= 50
-        $gfx.FillRectangle($glowBrushR, $mx - ($awayT + $homeT + 2 * $teamL + 75), $vy2 - 3, $awayT + $homeT + 2 * $teamL + 40, 20)
-        $gfx.DrawString( $timhome, $fontgf, $mclrh, $mx - ($awayT + $homeT + 2 * $teamL + 70), $vy2)
-        $gfx.DrawString( $infomtch, $fontgf, $mclr, $mx - $awayT - 70 - $teamL, $vy2)
-        $gfx.DrawString( $timaway, $fontgf, $mclra, $mx - 40 - $awayT, $vy2)
-        $gfx.DrawString( $mtcmnt, $fontgf, $mclr, $mx - ($awayT + $homeT + 2 * $teamL + 100), $vy2)
+        # $mx -= 10
+        $gfx.FillRectangle($glowBrushR, $mx - $rectLen, $vy2 - 3, $rectLen - 45, 20)
+        $gfx.DrawString( $mtcmnt, $fontgf, $mclr, $mx - $rectLen + 5, $vy2)
+        $gfx.DrawString( $timhome, $fontgf, $mclrh, $mx - $rectLen + 45, $vy2)
+        $gfx.DrawString( $infomtch, $fontgf, $mclr, $mx - $rectLen + 45 + $homeT + $spaceT, $vy2)
+        $gfx.DrawString( $timaway, $fontgf, $mclra, $mx - $rectLen + 85 + $homeT + $spaceT, $vy2)
+
+        # Write-Host "$([math]::round($angt)) $dgt       mx=$([math]::round($mx)) $([math]::round($my))       $([math]::round($vy2))         $timhome $tme`n"
     }
     else {
+        $vy2 = $c2 + $mainRy
         if ($my -lt ($vy + $vh)) {
             $vy += $vh
         }
         else {
             $vy = $my
         }
-        $mx += 95
-        $gfx.FillRectangle($glowBrushR, $mx - 5, $vy - 3, $awayT + $homeT + 2 * $teamL + 30, 20 )
-        $gfx.DrawString( $timhome, $fontgf, $mclrh, $mx , $vy  )
-        $gfx.DrawString( $infomtch, $fontgf, $mclr, $mx + $homeT + $teamL, $vy  )
-        $gfx.DrawString( $timaway, $fontgf, $mclra, $mx + $homeT + 20 + 2 * $teamL, $vy  )
-        $gfx.DrawString( $mtcmnt, $fontgf, $mclrh, $mx - 33 , $vy  )
+        $mx += 45
+        $gfx.FillRectangle($glowBrushR, $mx , $vy - 3, $rectLen - 45, 20 )
+        $gfx.DrawString( $mtcmnt, $fontgf, $mclrh, $mx + 5, $vy  )
+        $gfx.DrawString( $timhome, $fontgf, $mclrh, $mx + 45 , $vy  )
+        $gfx.DrawString( $infomtch, $fontgf, $mclr, $mx + $homeT + $spaceT + 45, $vy  )
+        $gfx.DrawString( $timaway, $fontgf, $mclra, $mx + $homeT + $spaceT + 85, $vy  )
+
+        # Write-Host "$([math]::round($angt)) $dgt   mx=$([math]::round($mx)) $([math]::round($my))       $([math]::round($vy))         $timhome $tme`n"
     }
 
-    # Write-Host "($angt $dgt $($mrmn.totalMinutes)) ) $($mclr.color)  mx=$([math]::round($mx)) $([math]::round($my))       $([math]::round($vy))         $timhome $tme`n"
+
 }
+# }
 
 # OPTIMIZATION: Clear large match data arrays after use to free memory
 $mtchs = $null
@@ -1085,13 +1107,13 @@ $fontgf = [Font]::New('Segoe UI Variable Text', 8, [FontStyle]::Bold)
 # 1. System Info Card (Top Left) New-LayoutCard
 # New-LayoutCard -X 20 -Y 50 -Width 260 -Height 160
 # $gfx.FillRectangle($gryla, 0, 0, 120, 180)
-$bb = $c1 + $mainRx * 3.25
-$cc = - $mainRy * 1.2
-$gfx.DrawString("Boot  ...  $($bootime.ToString('HH:mm'))", $font, $gryl, (New-Object System.Drawing.PointF ($bb + 8), (70 - $cc)))
+$bb = $width * 0.78
+$cc = $Height * 0.2
+$gfx.DrawString("Boot  ...  $($bootime.ToString('HH:mm'))", $font, $gryl, (New-Object System.Drawing.PointF ($bb + 8), ($cc)))
 
-$gfx.DrawString("CPU $cpuLoad ........... $prcss", $font, $cpuBrush, (New-Object System.Drawing.PointF ($bb), (100 - $cc)))
-$gfx.DrawString("Service ........... $srvs", $font, $clrMtv, (New-Object System.Drawing.PointF ($bb), (120 - $cc)))
-$gfx.DrawString("Memory ..... %$ramUsagePct", $font, $ramBrush, (New-Object System.Drawing.PointF ($bb), (140 - $cc)))
+$gfx.DrawString("CPU $cpuLoad ........... $prcss", $font, $cpuBrush, (New-Object System.Drawing.PointF ($bb), ($cc + 30)))
+$gfx.DrawString("Service ........... $srvs", $font, $clrMtv, (New-Object System.Drawing.PointF ($bb), ($cc + 60)))
+$gfx.DrawString("Memory ..... %$ramUsagePct", $font, $ramBrush, (New-Object System.Drawing.PointF ($bb), ($cc + 90)))
 # $gfx.DrawString($btc, $fontgf, $ornge, [PointF]::new($bb, 180))
 # $gfx.DrawString($eth, $fontgf, $tquaz, [PointF]::new($bb, 210))
 $startTime = (Get-Date).AddDays(-3)
@@ -1104,28 +1126,28 @@ $eventDescriptions = @{
     1     = 'log dosya boyutu üst sınıra ulaştı'
     4     = 'log dosya boyutu üst sınıra ulaştı'
     7     = 'Disk: Kötü sektör veya disk okuma/yazma hatası.'
-    10    = 'bozuk sürücüler veya hatalı güncellemeler'
+    10    = 'bozuk sürücüler veya hatalı Daycellemeler'
     18    = 'WHEA: İşlemci veya donanım hatası (CPU, RAM, anakart vb.).'
     19    = 'WHEA: Düzeltilmiş donanım hatası.'
     20    = 'WHEA: Düzeltilmemiş donanım hatası.'
     35    = 'Anakart bellenim sorunları '
-    41    = 'Kernel-Power: Sistem düzgün kapatılmadan yeniden başladı. Elektrik kesintisi, PSU, donma veya mavi ekran olabilir.'
-    51    = 'Disk: Diskte G/Ç (I/O) hatası oluştu.'
+    41    = 'Kernel-Power: Sistem düzDay kapatılmadan Newden başladı. Elektrik kesintisi, PSU, donma veya mavi ekran olabilir.'
+    51    = 'Disk: Diskte G/Ç (I/O) hatası occurred.'
     55    = 'NTFS: Dosya sistemi bozulması tespit edildi.'
     57    = 'NTFS: Dosya sistemi beklenmedik şekilde bozuldu.'
 
     129   = 'StorAHCI/StorPort: Depolama aygıtı yanıt vermedi, zaman aşımı.'
     142   = 'no WRM start by BITS'
-    153   = 'Disk: Gecikmeli disk erişimi veya yeniden deneme yapıldı.'
+    153   = 'Disk: Gecikmeli disk erişimi veya Newden deneme yapıldı.'
 
     131   = 'auto driver install'
-    161   = 'volmgr: Crash dump oluşturulamadı.'
+    161   = 'volmgr: Crash dump occurredrulamadı.'
 
     524   = 'disk wakeup spin time telemetry'
 
     1000  = 'Application Error: Bir uygulama çöktü. DLL, bellek veya yazılım hatası olabilir.'
-    1001  = 'Windows Error Reporting: Çökme raporu oluşturuldu.'
-    1074  = 'Planlı yeniden başlatma/kapatma. Hangi kullanıcı veya uygulamanın yaptığı kaydedilir.'
+    1001  = 'Windows Error Reporting: Çökme raporu occurredruldu.'
+    1074  = 'Planlı Newden başlatma/kapatma. Hangi kullanıcı veya uygulamanın yaptığı kaydedilir.'
 
     5858  = 'old WMI cant install'
     6008  = 'Beklenmeyen kapanma. Elektrik kesintisi, donma veya zorla kapatma.'
@@ -1168,14 +1190,21 @@ for ($n = 0; $n -lt $eee.Count; $n++) {
         $messageText = $eventDescriptions[$event.Id]
     }
 
-    $drawText = "${timeText}   : $($ProviderN) $messageText $idm$($event.LevelDisplayName)"
+    $drawText = "${timeText}   : $($ProviderN) $messageText $idm"
     if ($drawText.Length -gt 140) {
         $drawText = $drawText.Substring(0, 140) + '...'
     }
-    $etvfont = if ($event.Level -lt 2) { $pink }else { $grydrk }
-    $gfx.DrawString($drawText, $font, $etvfont, (New-Object System.Drawing.PointF 20, (30 * $n + 20)))
+    $etvfont = if ($event.Level -lt 2) { $pink }else { $gryd }
+    $gfx.DrawString($drawText, $font, $etvfont, (New-Object System.Drawing.PointF ($width * 0.78), ($Height * 0.7 + $n * 20)))
 }
 
+
+
+
+
+
+
+#-------------------------end-------------------------------------------
 
 
 $stopWatch.Stop()
@@ -1189,8 +1218,38 @@ Write-Host "RunTime  $elapsedTime seconds" -ForegroundColor Green
 # Start-Sleep -Seconds 5
 
 
-# Kaydet
-$png.Save($outputPath, [Imaging.ImageFormat]::Png)
+# save
+$fullOutputPath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot $outputPath))
+$outputDir = Split-Path $fullOutputPath -Parent
+if ($outputDir -and -not (Test-Path $outputDir)) {
+    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+}
+
+$tempOutputPath = "$fullOutputPath.tmp"
+if (Test-Path $tempOutputPath) {
+    Remove-Item $tempOutputPath -Force -ErrorAction SilentlyContinue
+}
+
+try {
+    $png.Save($tempOutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+    if (Test-Path $tempOutputPath) {
+        Move-Item -Path $tempOutputPath -Destination $fullOutputPath -Force
+    }
+}
+catch {
+    if (Test-Path $tempOutputPath) {
+        Remove-Item $tempOutputPath -Force -ErrorAction SilentlyContinue
+    }
+
+    $clonedBitmap = [System.Drawing.Bitmap]::new($png)
+    try {
+        $clonedBitmap.Save($fullOutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+    }
+    finally {
+        $clonedBitmap.Dispose()
+    }
+}
+
 # Cleanup
 # Cleanup resources
 @($font, $font2, $fontin, $tquaz, $gryl, $ornge, $pink, $format, $gren, $flrb, $gfx, $png) | ForEach-Object {
@@ -1209,20 +1268,37 @@ $ia = $null
 # Force garbage collection
 # [GC]::Collect()
 # [GC]::WaitForPendingFinalizers()
-
-# PNG’yi Duvar Kâğıdı Yapma (Anında)
-$code = @'
+[GC]::Collect()
+[GC]::WaitForPendingFinalizers()
+Start-Sleep -Milliseconds 300
+# PNGâ€™yi Duvar KÃ¢ğıdı Yapma (Anında)
+# $code = @'
+# using System.Runtime.InteropServices;
+# public class Wallpaper {
+#   [DllImport("user32.dll", SetLastError = true)]
+#   public static extern bool SystemParametersInfo(
+#     int uAction, int uParam, string lpvParam, int fuWinIni);
+# }
+# '@
+# Add-Type -Language CSharp $code
+if (-not ('Wallpaper' -as [type])) {
+    Add-Type @'
 using System.Runtime.InteropServices;
 public class Wallpaper {
-  [DllImport("user32.dll", SetLastError = true)]
-  public static extern bool SystemParametersInfo(
-    int uAction, int uParam, string lpvParam, int fuWinIni);
+    [DllImport("user32.dll", SetLastError=true)]
+    public static extern bool SystemParametersInfo(
+        int uAction,
+        int uParam,
+        string lpvParam,
+        int fuWinIni);
 }
 '@
-Add-Type -Language CSharp $code
+}
+$pngFullPath = (Get-Item $fullOutputPath).FullName
 
-$pngFullPath = (Get-Item $outputPath).FullName
-[Wallpaper]::SystemParametersInfo(20, 0, $pngFullPath, 3)
+$result = [Wallpaper]::SystemParametersInfo(20, 0, $pngFullPath, 3)
+Write-Host $result
+Write-Host ([Runtime.InteropServices.Marshal]::GetLastWin32Error())
 # Stop-Transcript
 # }
 # catch {
@@ -1232,5 +1308,5 @@ $pngFullPath = (Get-Item $outputPath).FullName
 # if ($_.ScriptStackTrace) { $errMsg += "`nStackTrace:`n$($_.ScriptStackTrace)" }
 # $errMsg += "`n----------`n"
 # $errMsg | Out-File -FilePath $LogPath -Encoding utf8 -Append
-# Write-Host "Hata oluştu. Detaylar kaydedildi: $LogPath" -ForegroundColor Red
+# Write-Host "Hata occurred. Detaylar kaydedildi: $LogPath" -ForegroundColor Red
 # }
