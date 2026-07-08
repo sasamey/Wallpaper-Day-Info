@@ -614,7 +614,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
 }
 
 # weather narrative today and night
-$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hy + 70)
+$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hy + 90)
 
 
 # **********    **************     **********    ********
@@ -706,7 +706,7 @@ $items | Select-Object -First $ttle | ForEach-Object {
 # drawing sport new
 $dbg = 'Sport news:                '
 # circlec -r ($mainRy * 1.85) -dg 198 -text $snews -hozntl $false -fontcrcl $fontgf -grdr $true -clrd $false -mode 'snews'
-$yPos = $height * 0.8
+$yPos = $height * 0.82
 # $Mtv = $png.GetPixel(1590, 890)
 # # $mtv
 # $clrMtv = Contrst $Mtv
@@ -733,7 +733,7 @@ for ($n = 0; $n -lt $snews.GetLength(0); $n++) {
 # ---------------------------------------------------------------#
 #import data from web and create each table amd teams to show
 $ligs = @(4339, 4328, 4335, 4332, 4331, 4334, 4480, 4960, 4429, 4562)
-if ($now.Month -lt 6 -or $now.Month -ge 8) {
+if ($now.Month -lt 6 -or $now.Month -gt 8) {
     $ids = $ligs[0..3]
 }
 else {
@@ -741,13 +741,14 @@ else {
 }
 # $ids = @(4339, 4328, 4335, 4332, 4331, 4334, 4429)
 $tims = @()
-
+$bordr = $false
 for ($t = 0; $t -lt $ids.Count; $t++) {
     if ($runn) {
         $url = 'https://www.thesportsdb.com/api/v1/json/123/lookuptable.php?l=' + $ids[$t]
         try {
             $response = Invoke-RestMethod -Uri $url -Method Get -ErrorAction Stop
             if ($response.table) {
+                $bordr = $true
                 # Write-Output "Lig : $($t+1) - Data is being fetched from the API..."
                 [System.IO.File]::WriteAllText(
                     ".\Test\etable$t.json",
@@ -758,6 +759,7 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
             }
             else {
                 throw 'API boş tablo döndürdü'
+                $bordr=$false
             }
         }
         catch {
@@ -796,7 +798,7 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
         $r = $mainRy * 1.98
         $xx = 150 * 360 / (6.24 * $r)
         if ($t -lt $tablec) {
-            circlec -r ($r) -dg ($xx * 0.5 * $tablec - $t * $xx) -text ($ligr) -mode 'ligr'
+            circlec -r ($r) -dg ($xx * 0.5 * $tablec - $t * $xx) -text ($ligr) -mode 'ligr' -clrd $bordr
         }
     }
 }
@@ -892,7 +894,7 @@ function NextTeamMatch {
 
 # New-team match
 NextTeamMatch -LeagueId 133804 -YOffset 90 -MatchName 'Gs'
-NextTeamMatch -LeagueId 135985 -YOffset 110 -MatchName 'Milli tak?m'
+NextTeamMatch -LeagueId 135985 -YOffset 110 -MatchName 'Milli takım'
 
 
 
@@ -921,7 +923,6 @@ for ($t = 0; $t -lt $ligs.Count; $t++) {
         }
     }
     else {
-        # Write-Host 'Test modeeeee: Dayün önemli matchesı'
         $response2 = Get-Content ".\Test\eday$t.json" -Raw | ConvertFrom-Json
         if ($response2.events) {
             $mtchs += $response2.events
@@ -1020,7 +1021,6 @@ for ($i = 0; $i -lt $mtchs.Count; $i++) {
         else {
             $vy2 = $my
         }
-        # $mx -= 10
         $gfx.FillRectangle($glowBrushR, $mx - $rectLen, $vy2 - 3, $rectLen - 45, 20)
         $gfx.DrawString( $mtcmnt, $fontgf, $mclr, $mx - $rectLen + 5, $vy2)
         $gfx.DrawString( $timhome, $fontgf, $mclrh, $mx - $rectLen + 45, $vy2)
@@ -1107,8 +1107,8 @@ $fontgf = [Font]::New('Segoe UI Variable Text', 8, [FontStyle]::Bold)
 # 1. System Info Card (Top Left) New-LayoutCard
 # New-LayoutCard -X 20 -Y 50 -Width 260 -Height 160
 # $gfx.FillRectangle($gryla, 0, 0, 120, 180)
-$bb = $width * 0.78
-$cc = $Height * 0.2
+$bb = $width * 0.7
+$cc = $Height * 0
 $gfx.DrawString("Boot  ...  $($bootime.ToString('HH:mm'))", $font, $gryl, (New-Object System.Drawing.PointF ($bb + 8), ($cc)))
 
 $gfx.DrawString("CPU $cpuLoad ........... $prcss", $font, $cpuBrush, (New-Object System.Drawing.PointF ($bb), ($cc + 30)))
@@ -1141,7 +1141,7 @@ $eventDescriptions = @{
     153   = 'Disk: Gecikmeli disk erişimi veya Newden deneme yapıldı.'
 
     131   = 'auto driver install'
-    161   = 'volmgr: Crash dump occurredrulamadı.'
+    161   = 'volmgr: Crash dump occurred'
 
     524   = 'disk wakeup spin time telemetry'
 
@@ -1195,7 +1195,7 @@ for ($n = 0; $n -lt $eee.Count; $n++) {
         $drawText = $drawText.Substring(0, 140) + '...'
     }
     $etvfont = if ($event.Level -lt 2) { $pink }else { $gryd }
-    $gfx.DrawString($drawText, $font, $etvfont, (New-Object System.Drawing.PointF ($width * 0.78), ($Height * 0.7 + $n * 20)))
+    $gfx.DrawString($drawText, $font, $etvfont, (New-Object System.Drawing.PointF ($width * 0.78), ($Height * 0.75 + $n * 20)))
 }
 
 
