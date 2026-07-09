@@ -1,0 +1,85 @@
+﻿"Başarı, sabır ve azimle gelir."
+"Hayallerine inan, çünkü onlar seni geleceğine taşır."
+"Bugün yaptığın şey yarının temelini oluşturur."
+"Başarı, asla pes etmeyenlerindir."
+"Her düşüş bir ders, her kalkış bir zaferdir."
+"Kendi hikayenin kahramanı ol."
+"Başarı, hazırlık ve fırsatın kesistiği yerdedir."
+"Büyük başarılar, küçük ama tutarlı adımlarla gelir."
+"Yol uzun olabilir, ama her adım seni zirveye taşır."
+"Düşüncelerine dikkat et,
+çünkü onlar senin geleceğindir."
+"Küçük bir adım bile büyük değişiklikler yaratabilir."
+"Hata yapmaktan korkma, çünkü onlar başarının anahtarıdır."
+"Düşüncelerini değiştir, hayatın değişsin."
+"Her sabah yeni bir başlangıçtır."
+"En karanlık anların arkasında ışık vardır."
+"Bir fikrin varsa, ona inan ve peşinden git."
+"Hayallerini gerçekleştirmek için bugün bir adım at."
+"Korkuların seni durdurmasına izin verme."
+"Zorluklar, başarının habercisidir."
+"Hayatta ne kadar ileri gideceğin, cesaretine bağlıdır."
+"Pozitif bir zihin, pozitif bir hayat yaratır."
+"Hayatta en önemli şey, kendi şansını yaratmaktır."
+"Her yeni gün, yeni bir fırsat getirir."
+"Gülümsemek, en güzel enerjidir."
+"Hayat, sen ne düşünüyorsan onu sana geri verir."
+"Kendine inan; bu, başarının yarısıdır."
+"Zorluklar seni daha güçlü yapar."
+"Her düşüş, kalkmak için bir fırsattır."
+"Küçük mutluluklar, büyük mutlulukları getirir."
+"Hayatın her anı bir hediyedir."
+"Yapamazsın diyenlere inat, yap!"
+"Hayal etmekten asla vazgeçme."
+"Sen başarırsan, herkes sustuğunda kazanırsın."
+"Hedefine odaklan, gerisi kendiliğinden gelir."
+"Engeller, başarı yolunda sadece bir merdivendir."
+"Küçüktüm ama şimdi buradayım; herşey mümkün."
+"Kendi potansiyelini keşfetmeden asla pes etme."
+"Hiçbir zafer, savaşmadan kazanılmaz."
+"Sen yeter ki iste; imkansız diye bir şey yoktur."
+"İnanırsan, yaparsın!"
+"Hayatımı sadece ben değiştirebilirim.
+Kimse benim için bunu yapmaz."
+"Hiç kimse geriye gidip yeni bir başlangıç yapamaz ama
+bugün yeni bir son yapıp yeniden başlayabilir."
+"Diğerlerinden daha akıllı olmak zorunda değiliz.
+Diğerlerinden daha disiplinli olmak zorundayız."
+"Uyandığınızda; yaşamanın,
+    zevk almanın, düşünmenin ve sevmenin
+ne kadar büyük bir ayrıcalık olduğunu hatırlayın."
+"Siz kendinize inanın, başkaları da size inanacaktır."
+"Karanlıktan korkan bir çocuğu kolayca affedebiliriz.
+Hayatın gerçek trajedisi büyükler ışıktan korktuğunda başlar."
+"Dünyayı değiştirebilen insanlar
+ buna inanacak kadar deli olanlardır."
+"Sadece görülmeyeni gören imkansızı başarabilir."
+"Her gün kendini yeniliyorsun. Bazen başarılı olursun,
+bazen olamazsın, ama önemli olan ortalamadır."
+"Kısa vadede acımasızca dürüst olun,
+uzun vade için ise iyimser ve kendinizden emin olun."
+"Birisi size bir şeyi yapamayacağını söylediğinde,
+belki de size sadece kendi yapamadıklarını söylüyordur."
+"Neye inanırsanız, onu yapabilirsiniz."
+"Bardağın yarısının dolu mu, boş mu tartışan insanlar
+asıl noktayı kaçırıyorlar. Bardak doldurulabilir."
+"Yüzünüzü güneşe çevirin,
+böylece gölgeler her zaman arkanızda kalacaktır"
+"Dün zekiydim, bu yüzden dünyayı değiştirmek istedim.
+Şimdi ise bilgeyim, bu sebeple kendimi değiştiriyorum."
+"Eğer bir şeyi değiştiremiyorsanız bırakın.
+Değiştiremediğiniz şeylerin mahkûmu olmayın."
+"Dışarıda olanları her zaman kontrol edemezsiniz.
+Ama içinde olanları edebilirsin."
+"En büyük düşmanınızın iki kulağınızın arasında yaşamadığına
+ emin olun."
+"Dünden ders alın, bugün için yaşayın, yarın için umutlu olun."
+"Hayatta en büyük keşif,
+ bir insanın kendi potansiyelini fark etmesidir."
+"Kendine liderlik edemeyen biri, başkalarını da yönlendiremez."
+"Her büyük değişim, küçük bir kararla başlar."
+"Başarılı insanlar güçlü yönlerine odaklanır,
+zayıflıkları üzerinde takılı kalmaz."
+"Başkalarının seni nasıl gördüğü değil,
+senin kendini nasıl gördüğün hayatını şekillendirir."
+"Kendini tanımak, tüm bilgeliğin başlangıcıdır."
