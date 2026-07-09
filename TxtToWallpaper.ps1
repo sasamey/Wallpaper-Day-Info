@@ -87,9 +87,10 @@ if ((($runMinute -lt 36) -and ($runMinute -gt 34)) -or (($runMinute -lt 6) -and 
 
 $weatherTxtPath = 'weather.txt'
 if ($runn) {
-    # Remove-Item $weatherTxtPath -ErrorAction SilentlyContinue
+    # choose your location and language
     $location = '36.629639,29.123722'
-    $url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=' + $location + '&units=m&language=tr-tr&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
+    $language = $PSUICulture  #'tr-tr'
+    $url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=' + $location + '&units=m&language=' + $language + '&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
     $data = Invoke-RestMethod -Uri $url -Method Get
     if ($null -ne $data) {
         $data | ConvertTo-Json -Depth 10 | Out-File -FilePath '.\Test\w.json' -Encoding utf8
@@ -308,8 +309,8 @@ for ($i = 1; $i -le $cloudn * 0.1; $i++) {
 }
 if ($imgcld) { $imgcld.Dispose(); $imgcld = $null }
 
-
-# $windr = 70
+#--------------------------------------------------------------------------#
+#                          wind arrows                                     #
 # ---------- windspd arrows from wind direction and speed near sunrise-sunset pies-------------------------
 # OPTIMIZED: Reuse pen object instead of creating new one each iteration
 $windpen = New-Object System.Drawing.Pen $tquaz, 1
@@ -330,17 +331,41 @@ try {
 finally {
     $windpen.Dispose()
 }
+#------------------------wind density around clock-----------------------------
+$state = $gfx.Save()
+$gfx.TranslateTransform($c1, $c2)
+$gfx.RotateTransform($windr - 90)
+# OPTIMIZED: Reuse Random and Brush objects
+$rndm = New-Object System.Random
+$glowbrushb = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(200, 50, 50, 50))
+try {
+    for ($i = 30; $i -lt $mainRy * $windspd / 30 ; $i += $windspd) {
+        # $d = if ($windr -gt 90) { $i}else { $i }
+        $hnext = $rndm.Next(-$c2 / 90 * $windspd, $c2 / 90 * $windspd)
+        $gradientRect = New-Object System.Drawing.Rectangle ([int]($i + $suncx * 0.65 - $windspd * 2)), ([int]$hnext), ([int]($rndm.Next($windspd , $windspd * 5))), ([int]($rndm.Next(1, 3)))
+        # write-host "$i  $hnext $($gradientRect.Size)  $($glowbrushb.Color)"
+        $gfx.FillEllipse($tquaz2, $gradientRect )
+    }
+}
+finally {
+    $glowbrushb.Dispose()
+}
+$gfx.Restore($state)
 
 
-#----------------------------------------------------------------------------# clock
-#                                                                            #
-#                                     Grid lines                         #
-#                                                                            #
-#----------------------------------------------------------------------------#
 
-# #     ---------grid-------------
+
+
+
+
+
+        #----------------------------------------------------------------------------# clock
+        #                                                                            #
+        #                       Grid lines   for measuring                           #
+        #                                                                            #
+        #----------------------------------------------------------------------------#
+
 # $fgt = 60
-# # Grid grid lines test
 # $tgf = $fgt * 33
 # for ($i = 0; $i -lt $tgf; $i += $fgt * 0.25) {
 #     if ($i % $fgt -eq 0) {
@@ -357,37 +382,11 @@ finally {
 #     }
 # }
 
-
-
-# $windr=165
-# ---------add background lines near wind direction around clock
-#  $windspd=12
-
-$state = $gfx.Save()
-$gfx.TranslateTransform($c1, $c2)
-$gfx.RotateTransform($windr - 90)
-
-# OPTIMIZED: Reuse Random and Brush objects
-$rndm = New-Object System.Random
-$glowbrushb = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(200, 50, 50, 50))
-try {
-    for ($i = 30; $i -lt $mainRy * $windspd / 30 ; $i += $windspd) {
-        # $d = if ($windr -gt 90) { $i}else { $i }
-        $hnext = $rndm.Next(-$c2 / 90 * $windspd, $c2 / 90 * $windspd)
-        $gradientRect = New-Object System.Drawing.Rectangle ([int]($i + $suncx * 0.65 - $windspd * 2)), ([int]$hnext), ([int]($rndm.Next($windspd , $windspd * 5))), ([int]($rndm.Next(1, 3)))
-        # write-host "$i  $hnext $($gradientRect.Size)  $($glowbrushb.Color)"
-        $gfx.FillEllipse($glowbrushb, $gradientRect )
-    }
-}
-finally {
-    $glowbrushb.Dispose()
-}
-
-$gfx.Restore($state)
-
-
-# ------------------------drawing clock and hourly weather------------------------
-
+#----------------------------------------------------------------------------#
+#                                                                            #
+#              Drawing clock   and   hourly temperature                       #
+#                                                                            #
+# ---------------------------------------------------------------------------#
 
 # color based on temperature
 $bgclr = ColorTemp $tempnow 192
@@ -403,9 +402,7 @@ $gr = 0
 $rd = 0
 $br = 0
 
-
 # --------------clock inner fill and circle outline----------
-
 
 $hvv = 0
 # saatin iç dolgusu
@@ -428,15 +425,6 @@ $mainRxScaled = $mainRx * 1
 $kts = 2.45
 # $gfx.FillEllipse($tquaz2, $c1 - $mainRx * $kts, $c2 - $mainRy * $kts, $mainRx *2* $kts, $mainRy * 2 * $kts)
 # $gfx.FillEllipse($ornge2, $c1 - $mainRx, $c2 - $mainRy, $mainRx * 2, $mainRy * 2)
-
-
-
-
-#----------------------------------------------------------------------------#
-#                                                                            #
-#              Drawing clock   and   hourly temperature                       #
-#                                                                            #
-# ---------------------------------------------------------------------------#
 
 # $bghour = $png.getpixel($c1 + 66, $c2)
 # $clrd = Contrst $bghour
@@ -472,7 +460,7 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
 
     if ( $startIdx -lt 4 ) {
         #[0,47]$startIdx = 0 = now hour ==> $startIdx = 4 = next hour ... $startIdx = 44 = last hour
-        $gfx.DrawLine( (New-Object System.Drawing.Pen $glowBrush2, 34), $ofx, $ofy , $ofx2, $ofy2 )
+        $gfx.DrawLine( (New-Object System.Drawing.Pen $glowBrush2, 13), $ofx, $ofy , $ofx2, $ofy2 )
     }
     # else {
     #     $gfx.DrawLine( (New-Object System.Drawing.Pen $grydrk, 1), $ofx, $ofy , $ofx2, $ofy2)
@@ -559,13 +547,13 @@ $gfx.FillPie($pieclr, $rectpie, $nowdgre, 360 * (1 - $dayProgress))
 #           Weekly weather ,icons                #
 #                                                                #
 # ---------------------------------------------------------------#
-
 # $sry = [Pen]::new($glowBrush, 3)
 # $gfx.DrawArc($sry, 960 - 360, 80, 360 * 2, 80 * 2, 185, 170)
 $flrc = [Color]::FromArgb(250, 0, 0, 0)
 $flrb = New-Object System.Drawing.SolidBrush $flrc
 $hv = 2
 $hy = $height * 0.85
+$hymin=$hy
 $topy = $hy
 $firsty = $hy
 for ($hx = 20; $hx -lt 520; $hx += 100) {
@@ -586,7 +574,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
         }
         $img = $imgCache[$cod30]
         # if ($hx -gt 20) {
-        $hy -= [System.Math]::Min(($temp30[$hv] - $temp30[$hv - 2]) * 20, 40)
+        $hy -= [System.Math]::Min(($temp30[$hv] - $temp30[$hv - 2]) * 20, 80)
         # }
         if ($hy -lt $topy) { $topy = $hy }
         if ($hx -gt 20) {
@@ -594,6 +582,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
         }
         # Write-Host "Day $($hv): $($temp30[$hv])Â°C,  $firsty y-position: $hy, topy: $topy $($temp30[$hv] - $temp30[$hv - 2])"
         $firsty = $hy
+        if ($hymin -gt $hy) { $hymin = $hy }
         # Write-Host "Adjusting y-position for day $hv based on temperature difference: $topy  $($temp30[$hv]) $(-$temp30[$hv] + $temp30[$hv-2])  ($hx $hy)"
         $rect = New-Object System.Drawing.Rectangle ([int]$hx), ([int]($hy - 20)), 32, 32
         $iclr = if ($null -ne $qPh30[$hv] -and $qPh30[$hv] -gt 0) { $pink } else { ColorTemp $temp30[$hv] 55 }
@@ -614,12 +603,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
 }
 
 # weather narrative today and night
-$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hy + 90)
-
-
-# **********    **************     **********    ********
-
-
+$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hymin + 100)
 
 
 
@@ -666,13 +650,13 @@ if ($mtvs) {
     # $gfx.Restore($state)
 }
 
+
+
 #----------------------------------------------------------------#
 #                                                                #
 #                         sport news data                        #
 #                                                                #
 #----------------------------------------------------------------#
-
-
 $xml = New-Object System.Xml.XmlDocument
 if ($runn) {
     $url = 'https://www.mynet.com/spor/rss'
@@ -724,6 +708,8 @@ for ($n = 0; $n -lt $snews.GetLength(0); $n++) {
         }
     }
 }
+
+
 
 
 #----------------------------------------------------------------#
@@ -804,15 +790,19 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
 }
 $tims += @('Liverpool', 'Tottenham Hotspur')
 
+
+
+
+
 #----------------------------------------------------------------#
 #                                                                #
-#               NEXT matches champs league                       #
+#               NEXT matches leagues and teams                   #
 #
-
 
 $bgnext = $png.GetPixel($unt * 51, 30)
 $nxtclr = Contrst $bgnext
 # 4960 türkish cup
+# your favorite leauges, next match
 function NextLeagueMatch {
     param([int]$LeagueId, [int]$YOffset, [string]$MatchName)
     $testFile = ".\Test\eday$($LeagueId).json"
@@ -850,11 +840,13 @@ function NextLeagueMatch {
 }
 
 # New-league match
-# NextLeagueMatch -LeagueId 4480 -YOffset 10 -MatchName 'Champions League Match'
+NextLeagueMatch -LeagueId 4480 -YOffset 10 -MatchName 'Champions League Match'
 NextLeagueMatch -LeagueId 4429 -YOffset 30 -MatchName 'FIFA World Cup'
 NextLeagueMatch -LeagueId 135985 -YOffset 50 -MatchName 'UEFA Nations League '
-# NextLeagueMatch 4960 -YOffset 70 -MatchName 'Turkish Cup Match'
+NextLeagueMatch 4960 -YOffset 70 -MatchName 'Turkish Cup Match'
 
+
+# your team and country, next match
 function NextTeamMatch {
     param([int]$LeagueId, [int]$YOffset, [string]$MatchName)
     $testFile = ".\Test\nexteam$($LeagueId).json"
@@ -893,8 +885,8 @@ function NextTeamMatch {
 }
 
 # New-team match
-NextTeamMatch -LeagueId 133804 -YOffset 90 -MatchName 'Gs'
-NextTeamMatch -LeagueId 135985 -YOffset 110 -MatchName 'Milli takım'
+NextTeamMatch -LeagueId 133804 -YOffset 90 -MatchName 'Gs'            #your team code
+NextTeamMatch -LeagueId 135985 -YOffset 110 -MatchName 'Milli takım'  #your country code
 
 
 
