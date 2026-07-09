@@ -18,7 +18,7 @@ $Win.Height = 10
 $Win.Width = 35
 $H.UI.RawUI.Set_WindowSize($Win)
 
-$url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=36.629639,29.1237228&units=m&language=tr-tr&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
+$url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=33.3,22.28&units=m&language=tr-tr&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
 $data = Invoke-RestMethod -Uri $url -Method Get
 
 $temprture = $data.'v3-wx-forecast-hourly-12hour'.temperatureFeelsLike
