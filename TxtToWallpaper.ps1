@@ -88,7 +88,7 @@ if ((($runMinute -lt 36) -and ($runMinute -gt 34)) -or (($runMinute -lt 6) -and 
 $weatherTxtPath = 'weather.txt'
 if ($runn) {
     # choose your location and language
-    $location = '33.3,22.2'
+    $location = '36.629639,29.123722'
     $language = $PSUICulture  #'tr-tr'
     $url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=' + $location + '&units=m&language=' + $language + '&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
     $data = Invoke-RestMethod -Uri $url -Method Get
@@ -923,7 +923,7 @@ for ($t = 0; $t -lt $ligs.Count; $t++) {
     }
 }
 if (($mtchs.Count) -gt 1) {
-    $mtchs = $mtchs | Sort-Object -Property { [datetime]$_.strTimestamp }
+    $mtchs = $mtchs | Sort-Object -Property { ([datetime]$_.strTimestamp).Hour % 12 }
 }
 
 Write-Output "$($mtchs.count) match var...`n"
@@ -1036,7 +1036,7 @@ for ($i = 0; $i -lt $mtchs.Count; $i++) {
         $gfx.DrawString( $infomtch, $fontgf, $mclr, $mx + $homeT + $spaceT + 45, $vy  )
         $gfx.DrawString( $timaway, $fontgf, $mclra, $mx + $homeT + $spaceT + 85, $vy  )
 
-        # Write-Host "$([math]::round($angt)) $dgt   mx=$([math]::round($mx)) $([math]::round($my))       $([math]::round($vy))         $timhome $tme`n"
+        # Write-Host "$([math]::round($angt)) $dgt   mx=$([math]::round($mx)) $([math]::round($my))       $([math]::round($vy))       $timhome $tme`n"
     }
 
 
