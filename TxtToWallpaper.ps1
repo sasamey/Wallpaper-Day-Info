@@ -89,7 +89,7 @@ $weatherTxtPath = 'weather.txt'
 if ($runn) {
     # choose your location and language
     $location = '36.629639,29.123722'
-    $language = $PSUICulture  #'tr-tr'
+    $language = $PSCulture  #'tr-tr'
     $url = 'https://api.weather.com/v3/aggcommon/v3-wx-observations-current;v3-wx-forecast-daily-15day;v3-wx-forecast-hourly-12hour?format=json&geocode=' + $location + '&units=m&language=' + $language + '&apiKey=71f92ea9dd2f4790b92ea9dd2f779061'
     $data = Invoke-RestMethod -Uri $url -Method Get
     if ($null -ne $data) {
@@ -107,7 +107,7 @@ else {
 
 
 # 12 saatlik..................................................................
-$temp12 = $data.'v3-wx-forecast-hourly-12hour'.temperatureFeelsLike
+$temp12 = $data.'v3-wx-forecast-hourly-12hour'.temperatureWindChill
 $tm12 = $data.'v3-wx-forecast-hourly-12hour'.validTimeLocal | ForEach-Object { [datetime]$_ }
 $hava12 = $data.'v3-wx-forecast-hourly-12hour'.wxPhraseLong
 $vTimeL = $data.'v3-wx-forecast-hourly-12hour'.validTimeLocal | ForEach-Object { [datetime]$_ }
@@ -116,7 +116,7 @@ $prChnce12 = $data.'v3-wx-forecast-hourly-12hour'.precipChance
 # 15 daily...................................................................
 $iconcode30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].iconcode
 $hava30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].wxPhraseLong
-$temp30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].temperature
+$temp30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].temperatureWindChill
 $dayNight30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].daypartName
 $qPh30 = $data.'v3-wx-forecast-daily-15day'.daypart[0].qpf
 $nrtv15 = $data.'v3-wx-forecast-daily-15day'.narrative
@@ -124,6 +124,7 @@ $nrtv15 = $data.'v3-wx-forecast-daily-15day'.narrative
 $sunrise = [datetime]$data.'v3-wx-observations-current'.sunriseTimeLocal
 $sunset = [datetime]$data.'v3-wx-observations-current'.sunsetTimeLocal
 $tempnow = $data.'v3-wx-observations-current'.temperatureFeelsLike
+$tempchill = $data.'v3-wx-observations-current'.temperatureWindChill
 $iconcode = $data.'v3-wx-observations-current'.iconcode
 $havanow = $data.'v3-wx-observations-current'.wxPhraseLong
 $lastme = $data.'v3-wx-observations-current'.validTimeLocal
@@ -359,11 +360,11 @@ $gfx.Restore($state)
 
 
 
-        #----------------------------------------------------------------------------# clock
-        #                                                                            #
-        #                       Grid lines   for measuring                           #
-        #                                                                            #
-        #----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------# clock
+#                                                                            #
+#                       Grid lines   for measuring                           #
+#                                                                            #
+#----------------------------------------------------------------------------#
 
 # $fgt = 60
 # $tgf = $fgt * 33
@@ -389,7 +390,7 @@ $gfx.Restore($state)
 # ---------------------------------------------------------------------------#
 
 # color based on temperature
-$bgclr = ColorTemp $tempnow 192
+$bgclr = ColorTemp $tempchill 192
 $fontclr = Contrst $bgclr.Color
 
 $imgCache = @{}
@@ -434,6 +435,9 @@ $hvv = 0
 $nowi = $hr * 4
 $nowd = $nowi + [int]($mn / 15)
 $nowdf = ($nowi + ($mn / 15))
+
+
+
 for ($i = $nowi; $i -lt $nowi + 48; $i++) {
     # $nowd [0,95]   newi [-12,35] i-nowd=[0,47]   idx=(i-nowd)/4=[0,11]
     # Ensure newi is in range 0..47 (always positive)
@@ -477,7 +481,7 @@ for ($i = $nowi; $i -lt $nowi + 48; $i++) {
         $gfx.DrawString("$([int]($i/4)%24)", $font, $gryd, (New-Object System.Drawing.PointF ($mainRx * 0.78), (-10)))
         # current hour temperature on clock arc + weather phrase in center circle
         if ( $idx -eq 0) {
-            $gfx.DrawString($tempnow, $fontMid, $bgclr, (New-Object System.Drawing.PointF ($newRlen), ( - 10)))
+            $gfx.DrawString($tempchill, $fontMid, $bgclr, (New-Object System.Drawing.PointF ($newRlen), ( - 10)))
             $gfx.DrawString($havanow, $fontgf, $bgclr, (New-Object System.Drawing.PointF (30), (-5)))
         }
         else {
@@ -551,16 +555,20 @@ $gfx.FillPie($pieclr, $rectpie, $nowdgre, 360 * (1 - $dayProgress))
 # $gfx.DrawArc($sry, 960 - 360, 80, 360 * 2, 80 * 2, 185, 170)
 $flrc = [Color]::FromArgb(250, 0, 0, 0)
 $flrb = New-Object System.Drawing.SolidBrush $flrc
-$hv = 2
-$hy = $height * 0.85
-$hymin=$hy
+$hv = 0
+$hy = $height * 0.75
+$botmy = $hy
 $topy = $hy
 $firsty = $hy
-for ($hx = 20; $hx -lt 520; $hx += 100) {
-    $cod30 = $iconcode30[$hv]
-    $img = $null
 
+if ($temp30[0] -eq $null){$temp30[0]=$temp30[2]}
+
+for ($hx = -80; $hx -lt 520; $hx += 100) {
+
+    $img = $null
     try {
+        $cod30 = $iconcode30[$hv]
+        if ($cod30 -eq $null) { $cod30 = $iconcode }
         $imgPath30 = Join-Path $PSScriptRoot ".\Deluxe\$cod30.png"
         if (-not $imgCache.ContainsKey($cod30)) {
             if (Test-Path $imgPath30) {
@@ -574,26 +582,27 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
         }
         $img = $imgCache[$cod30]
         # if ($hx -gt 20) {
-        $hy -= [System.Math]::Min(($temp30[$hv] - $temp30[$hv - 2]) * 20, 80)
-        # }
-        if ($hy -lt $topy) { $topy = $hy }
-        if ($hx -gt 20) {
-            $gfx.DrawLine([Pen]::new($grydrk, 1), $hx - 100 + 42, $firsty + 55, $hx + 42, $hy + 55)
-        }
-        # Write-Host "Day $($hv): $($temp30[$hv])Â°C,  $firsty y-position: $hy, topy: $topy $($temp30[$hv] - $temp30[$hv - 2])"
-        $firsty = $hy
-        if ($hymin -gt $hy) { $hymin = $hy }
-        # Write-Host "Adjusting y-position for day $hv based on temperature difference: $topy  $($temp30[$hv]) $(-$temp30[$hv] + $temp30[$hv-2])  ($hx $hy)"
-        $rect = New-Object System.Drawing.Rectangle ([int]$hx), ([int]($hy - 20)), 32, 32
-        $iclr = if ($null -ne $qPh30[$hv] -and $qPh30[$hv] -gt 0) { $pink } else { ColorTemp $temp30[$hv] 55 }
+        if ($hx -gt 0) {
+            # Write-Host "Adjusting y-position for day $hv based on temperature difference: $topy  $($temp30[$hv]) $(-$temp30[$hv] + $temp30[$hv-2])  ($hx $hy)"
+            $rect = New-Object System.Drawing.Rectangle ([int]$hx), ([int]($hy - 20)), 32, 32
+            $iclr = if ($null -ne $qPh30[$hv] -and $qPh30[$hv] -gt 0) { $pink } else { ColorTemp $temp30[$hv] 55 }
 
-        $gfx.FillRectangle($iclr, $hx - 5, $hy - 32, 85, 65)
-        $gfx.DrawString($dayNight30[$hv], $fontgf, $flrb, (New-Object System.Drawing.PointF ($hx + 5), ($hy - 32)))
-        if ($img) {
-            $gfx.DrawImage($img, $rect, 0, 0, $img.Width, $img.Height, [System.Drawing.GraphicsUnit]::Pixel, $ia)
+            $gfx.FillRectangle($iclr, $hx - 5, $hy - 32, 85, 65)
+            $gfx.DrawString($dayNight30[$hv], $fontgf, $flrb, (New-Object System.Drawing.PointF ($hx + 5), ($hy - 32)))
+            if ($img) {
+                $gfx.DrawImage($img, $rect, 0, 0, $img.Width, $img.Height, [System.Drawing.GraphicsUnit]::Pixel, $ia)
+            }
+            $gfx.DrawString($temp30[$hv], $fontin, $flrb, (New-Object System.Drawing.PointF ($hx + 40), ($hy - 10 )))
+            $gfx.DrawString($hava30[$hv][0..12] -join '', $fontgf, $flrb, (New-Object System.Drawing.PointF ($hx - 3), ($hy + 18)))
         }
-        $gfx.DrawString($temp30[$hv], $fontin, $flrb, (New-Object System.Drawing.PointF ($hx + 40), ($hy - 10 )))
-        $gfx.DrawString($hava30[$hv][0..12] -join '', $fontgf, $flrb, (New-Object System.Drawing.PointF ($hx - 3), ($hy + 18)))
+        $firsty = $hy
+        $hy -= [System.Math]::Max(-80, [System.Math]::Min( ($temp30[$hv + 2] - $temp30[$hv]) * 20, 80))
+        if ($topy -gt $hy) { $topy = $hy }
+        if ($botmy -lt $hy) { $botmy = $hy }
+        # Write-Host "$hx Day $($hv): $($temp30[$hv])°C,  $firsty y:$hy,                 topy: $topy-$botmy $($temp30[$hv+2] - $temp30[$hv]) $code30"
+        $gfx.DrawLine([Pen]::new($gryl, 2), $hx + 42, $firsty + 75, $hx + 142, $hy + 75)
+
+
     }
     finally {
         # Image will be disposed after all usage
@@ -603,7 +612,7 @@ for ($hx = 20; $hx -lt 520; $hx += 100) {
 }
 
 # weather narrative today and night
-$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hymin + 100)
+$gfx.DrawString($nrtv15[0], $font, $gryl, 20, $botmy + 85)
 
 
 
@@ -615,8 +624,13 @@ $gfx.DrawString($nrtv15[0], $font, $gryl, 20, $hymin + 100)
 
 $random = New-Object System.Random
 $mtvs = $true
+# $PSUICulture
 if ($mtvs) {
     $strng = Get-Content '.\motive.txt' -Raw
+    if ($PSCulture -ne 'tr-tr') {
+        $strng = Get-Content '.\motive-en.txt' -Raw
+    }
+
     $motve = $strng -split '\."' | ForEach-Object { $_.Trim() }
 
     # $chs1 = $random.Next(0, $motve.Count)
@@ -695,19 +709,28 @@ $yPos = $height * 0.82
 # # $mtv
 # $clrMtv = Contrst $Mtv
 
+
 for ($n = 0; $n -lt $snews.GetLength(0); $n++) {
+
     if ($snews[$n, 0]) {
+        $state = $gfx.Save()
+        $gfx.TranslateTransform($width * 0.78, $yPos)
+        $gfx.RotateTransform($n-1)
+
         if ($n % 2 -eq 0) {
             # $stext = $gfx.MeasureString($snews[$n,0], $font)
             # $rectsport = [RectangleF]::new(90, $yPos + $n * 30, $stext.Width2*0.85, $stext.Height)
             # $gfx.FillRectangle($glowBrushR, $rectsport)
-            $gfx.DrawString(($snews[$n, 0]), $font, $ornge2, [PointF]::new($width * 0.78 - $n * 5, $yPos + ($n * 22)))
+            $gfx.DrawString(($snews[$n, 0]), $font, $ornge2, [PointF]::new( - $n * 5, ($n * 22)))
         }
         else {
-            $gfx.DrawString(($snews[$n, 0]), $font, $tquaz2, [PointF]::new($width * 0.78 - $n * 5, $yPos + ($n * 22)))
+            $gfx.DrawString(($snews[$n, 0]), $font, $tquaz2, [PointF]::new(- $n * 5,($n * 22)))
         }
+        $gfx.Restore($state)
     }
+
 }
+
 
 
 
@@ -745,7 +768,7 @@ for ($t = 0; $t -lt $ids.Count; $t++) {
             }
             else {
                 throw 'API boş tablo döndürdü'
-                $bordr=$false
+                $bordr = $false
             }
         }
         catch {
